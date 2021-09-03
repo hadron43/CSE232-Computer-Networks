@@ -12,6 +12,8 @@
 #include <fcntl.h>
 
 #define MAX_BUFFER_SIZE 1024
+#define MAX_NO_PROCESSES 100000
+#define PROCESS_NAME_LENGTH 128
 
 void check_error(int return_val, char *str) {
     if(return_val < 0) {
@@ -20,12 +22,9 @@ void check_error(int return_val, char *str) {
     }
 }
 
-#define MAX_NO_PROCESSES 100000
-#define MAX_BUFF_LENGTH 128
-
 struct process {
     int pid;
-    char name[MAX_BUFF_LENGTH];
+    char name[PROCESS_NAME_LENGTH];
     int usage;
 };
 
@@ -53,7 +52,7 @@ void get_process_name(FILE *file, char *buff) {
 
 struct process process_stat_file(char *filepath) {
     FILE* file = fopen(filepath, "r");
-    char buff[MAX_BUFF_LENGTH];
+    char buff[PROCESS_NAME_LENGTH];
     struct process p;
     int index = 1;
 
@@ -221,7 +220,7 @@ void *handle_connection(void *arg) {
     pthread_exit(NULL);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
     int sd, connfd, tmp, len;
     struct sockaddr_in myaddr, client_addr;
 
