@@ -3,7 +3,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <strings.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     // in reply, server will now send top N processes details
     // read until server stops sending
     while(read(sd, s_buff, sizeof(s_buff)) > 0) {
-        tmp = write(fd, s_buff, sizeof(s_buff));
+        tmp = write(fd, s_buff, strlen(s_buff));
         check_error(tmp, "write");
     }
     close(fd);

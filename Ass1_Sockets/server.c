@@ -11,7 +11,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-
 #define MAX_BUFFER_SIZE 1024
 
 void check_error(int return_val, char *str) {
@@ -24,14 +23,11 @@ void check_error(int return_val, char *str) {
 #define MAX_NO_PROCESSES 100000
 #define MAX_BUFF_LENGTH 128
 
-int list_of_process_ids[MAX_NO_PROCESSES];
-int no_of_processes;
-
 struct process {
     int pid;
     char name[MAX_BUFF_LENGTH];
     int usage;
-} *process_list;
+};
 
 int is_higher(struct process *p1, struct process *p2) {
     // returns 1 if p1 has more usage than p2, 0 otherwise
@@ -106,8 +102,8 @@ int is_valid_process_directory(char *d_name) {
     return ans;
 }
 
-void get_list_of_processes() {
-    no_of_processes = 0;
+void get_list_of_processes(int *no_of_processes, int *list_of_process_ids) {
+    *no_of_processes = 0;
 
     DIR *d;
     struct dirent *dir;
@@ -117,41 +113,42 @@ void get_list_of_processes() {
         while ((dir = readdir(d)) != NULL) {
             if(dir -> d_type != 4 || is_valid_process_directory(dir -> d_name) == 0)
                 continue;
-            list_of_process_ids[no_of_processes ++] = atoi(dir -> d_name);
+            list_of_process_ids[(*no_of_processes) ++] = atoi(dir -> d_name);
         }
         closedir(d);
     }
 }
 
-void swap_process_in_list(int i, int j) {
+void swap_process_in_list(struct process *process_list, int i, int j) {
     struct process temp = process_list[i];
     process_list[i] = process_list[j];
     process_list[j] = temp;
 }
 
-int partition_process_list(int low, int high) {
+int partition_process_list(struct process *process_list, int low, int high) {
     struct process *pivot = process_list + high;
     int i = low - 1;
     for(int j = low; j <= high - 1; j++) {
         if(is_higher(process_list + j, pivot)) {
             i++;
-            swap_process_in_list(i, j);
+            swap_process_in_list(process_list, i, j);
         }
     }
-    swap_process_in_list(i+1, high);
+    swap_process_in_list(process_list, i+1, high);
     return (i+1);
 }
 
-void sort_process_list(int low, int high) {
+void sort_process_list(struct process *process_list, int low, int high) {
     if(low >= high)
         return;
 
-    int pi = partition_process_list(low, high);
-    sort_process_list(low, pi - 1);
-    sort_process_list(pi + 1, high);
+    int pi = partition_process_list(process_list, low, high);
+    sort_process_list(process_list, low, pi - 1);
+    sort_process_list(process_list, pi + 1, high);
 }
 
-void write_processes_to_file(char *filepath, int N) {
+void write_processes_to_file(struct process *process_list, int no_of_processes,
+ char *filepath, int N) {
     FILE *fptr;
     struct process *p;
 
@@ -170,9 +167,12 @@ void write_processes_to_file(char *filepath, int N) {
 }
 
 void create_data_file(char *data_file_path, int N) {
+    int list_of_process_ids[MAX_NO_PROCESSES];
+    int no_of_processes;
+    struct process *process_list;
     char filepath[512] = "";
 
-    get_list_of_processes();
+    get_list_of_processes(&no_of_processes, list_of_process_ids);
     process_list = (struct process *) malloc(sizeof(struct process) * no_of_processes);
 
     for(int i = 0; i < no_of_processes; ++i) {
@@ -180,8 +180,8 @@ void create_data_file(char *data_file_path, int N) {
         process_list[i]  = process_stat_file(filepath);
     }
 
-    sort_process_list(0, no_of_processes - 1);
-    write_processes_to_file(data_file_path, N);
+    sort_process_list(process_list, 0, no_of_processes - 1);
+    write_processes_to_file(process_list, no_of_processes, data_file_path, N);
 
     free(process_list);
 }
