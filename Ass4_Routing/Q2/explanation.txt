@@ -1,0 +1,9 @@
+C) The problem is that we are getting count to infinity scenario. After removal
+of the link B -> C and C -> B, the table has to be updated again and again
+before it converges to infinity. This leads to wastage of compuation power,
+as well as the a lot of data will be lost in case the router is trying to send
+something before the table is getting updated.
+
+To overcome this, we can use poison reverse technique, which has been
+implemented in Q3.
+
