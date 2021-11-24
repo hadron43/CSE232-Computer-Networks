@@ -107,7 +107,7 @@ void RoutingNode::recvMsg(RouteMsg *msg) {
       new_entry.dstip = (msg -> mytbl) -> tbl[i].dstip;
       new_entry.ip_interface = msg->recvip;
       new_entry.nexthop = msg->from;
-      new_entry.cost = max((msg -> mytbl)->tbl[i].cost + 1, 16);
+      new_entry.cost = min((msg -> mytbl)->tbl[i].cost + 1, 16);
 
       mytbl.tbl.push_back(new_entry);
       settled=false;
