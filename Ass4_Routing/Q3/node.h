@@ -17,6 +17,7 @@ class RoutingEntry{
   string dstip, nexthop;
   string ip_interface;
   int cost;
+  int share_cost;
   /* You will have to add a new variable say, share_cost.
   'share_cost' holds the cost that has to be shared with the neighbor.
   This change will be required to complete Q.3. of the assignment. */
@@ -172,16 +173,21 @@ class Node {
   }
 
   void sendMsg() {
+    struct routingtbl ntbl;
+    for (int i = 0; i < mytbl.tbl.size(); ++i) {
+      ntbl.tbl.push_back(mytbl.tbl[i]);
+    }
+
+    for(auto &entry : ntbl.tbl) {
+      entry.share_cost = entry.cost;
+    }
+
     for (int i = 0; i < interfaces.size(); ++i) {
       RouteMsg msg;
-      struct routingtbl ntbl;
-      for (int i = 0; i < mytbl.tbl.size(); ++i) {
-        ntbl.tbl.push_back(mytbl.tbl[i]);
-      }
 
       for (int j = 0; j < ntbl.tbl.size(); ++j) {
         if((interfaces[i].second) -> isMyInterface(ntbl.tbl[j].nexthop))
-          ntbl.tbl[j].cost = 16;
+          ntbl.tbl[j].share_cost = 16;
       }
 
       msg.from = interfaces[i].first.getip();
@@ -189,6 +195,10 @@ class Node {
       msg.recvip = interfaces[i].first.getConnectedIp();
 
       interfaces[i].second->recvMsg(&msg);
+
+      for(auto &entry : ntbl.tbl) {
+        entry.share_cost = entry.cost;
+      }
     }
   }
 

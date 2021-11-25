@@ -80,20 +80,20 @@ void RoutingNode::recvMsg(RouteMsg *msg) {
       // entry with matching destinatino IP found
       found = true;
 
-      if(min(1 + (msg -> mytbl)->tbl[i].cost, 16) < mytbl.tbl[j].cost) {
+      if(min(1 + (msg -> mytbl)->tbl[i].share_cost, 16) < mytbl.tbl[j].cost) {
         // we need to update entry as new cost is less
         settled = false;
 
         // dest same as original entry
         mytbl.tbl[j].nexthop = msg->from;
         mytbl.tbl[j].ip_interface = msg->recvip;
-        mytbl.tbl[j].cost = min(1 + (msg -> mytbl) -> tbl[i].cost, 16);
+        mytbl.tbl[j].cost = min(1 + (msg -> mytbl) -> tbl[i].share_cost, 16);
       }
       else if(mytbl.tbl[j].nexthop == msg -> from){
         // if next hop has updated cost, update
-        if(min(1 + (msg -> mytbl)->tbl[i].cost, 16) != mytbl.tbl[j].cost) {
+        if(min(1 + (msg -> mytbl)->tbl[i].share_cost, 16) != mytbl.tbl[j].cost) {
           settled = false;
-          mytbl.tbl[j].cost = min(1 + (msg -> mytbl)->tbl[i].cost, 16);
+          mytbl.tbl[j].cost = min(1 + (msg -> mytbl)->tbl[i].share_cost, 16);
         }
       }
 
@@ -107,7 +107,7 @@ void RoutingNode::recvMsg(RouteMsg *msg) {
       new_entry.dstip = (msg -> mytbl) -> tbl[i].dstip;
       new_entry.ip_interface = msg->recvip;
       new_entry.nexthop = msg->from;
-      new_entry.cost = min((msg -> mytbl)->tbl[i].cost + 1, 16);
+      new_entry.cost = min((msg -> mytbl)->tbl[i].share_cost + 1, 16);
 
       mytbl.tbl.push_back(new_entry);
       settled=false;
